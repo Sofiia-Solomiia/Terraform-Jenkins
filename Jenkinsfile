@@ -16,13 +16,13 @@ pipeline {
   stages {
     stage('Terraform Init') {
       steps {
-        sh 'terraform init -auto-approve'
+        sh 'terraform init -reconfigure'
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        sh 'terraform plan -auto-approve'
+        sh 'terraform plan'
       }
     }
 
