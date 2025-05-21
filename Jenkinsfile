@@ -16,19 +16,19 @@ pipeline {
   stages {
     stage('Terraform Init') {
       steps {
-        sh 'terraform init'
+        sh 'terraform init -input=false'
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        sh 'terraform plan'
+        sh 'terraform plan -input=false'
       }
     }
 
     stage('Terraform Apply') {
       steps {
-        sh 'terraform apply -auto-approve'
+        sh 'terraform apply -auto-approve -input=false'
       }
     }
   }
