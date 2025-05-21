@@ -16,13 +16,13 @@ pipeline {
   stages {
     stage('Terraform Init') {
       steps {
-        sh 'terraform init -input=false'
+        sh 'terraform init -reconfigure'
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        sh 'terraform plan -input=false'
+        sh 'terraform plan -input=true'
       }
     }
 
