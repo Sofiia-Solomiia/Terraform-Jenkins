@@ -16,6 +16,7 @@ pipeline {
   stages {
     stage('Terraform Init') {
       steps {
+        sh 'rm -f terraform.tfstate terraform.tfstate.backup'
         sh 'terraform init -reconfigure'
       }
     }
