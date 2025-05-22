@@ -21,16 +21,13 @@ pipeline {
       }
     }
 
-    stage('Terraform Plan') {
-      steps {
-        sh 'terraform plan'
-      }
-    }
+    stage('Terraform Destroy') {
+            steps {
+                // Запитати підтвердження (опціонально)
+                input message: 'Are you sure you want to destroy the infrastructure?', ok: 'Destroy'
 
-    stage('Terraform Apply') {
-      steps {
-        sh 'terraform apply -auto-approve'
-      }
+                // Виконати знищення інфраструктури
+                sh 'terraform destroy -auto-approve'
     }
   }
 }
