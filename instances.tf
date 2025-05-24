@@ -10,15 +10,3 @@ resource "aws_instance" "web" {
     Name = "${var.project_name}-web-server"
   }
 }
-resource "aws_instance" "monitoring" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  subnet_id     = aws_subnet.public.id
-  key_name      = aws_key_pair.deployer.key_name
-  security_groups = [aws_security_group.monitoring_sg.name]
-  user_data = file("install_monitoring.sh")
-
-  tags = {
-    Name = "${var.project_name}-monitoring"
-  }
-}
