@@ -28,7 +28,7 @@ global:
 scrape_configs:
   - job_name: 'jenkins-node'
     static_configs:
-      - targets: ['<IP_адреса_Jenkins>:9100']
+      - targets: ['${aws_instance.jenkins.private_ip}:9100']
 EOF
 
 docker-compose up -d
