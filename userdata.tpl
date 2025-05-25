@@ -7,94 +7,105 @@ sudo chmod 666 /var/run/docker.sock
 docker pull sofiasolomiia/weather-page:v11
 sudo docker run -d -p 80:80 sofiasolomiia/weather-page:v11
 
-wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
-echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
-sudo apt-get update
-sudo apt-get install -y grafana
-sudo systemctl daemon-reload
-sudo systemctl start grafana-server
-sudo systemctl enable grafana-server.service
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-sudo useradd --no-create-home prometheus
-sudo mkdir /etc/prometheus
-sudo mkdir /var/lib/prometheus
-cd /tmp
-wget https://github.com/prometheus/prometheus/releases/download/v2.37.0/prometheus-2.37.0.linux-amd64.tar.gz
-tar xvfz prometheus-2.37.0.linux-amd64.tar.gz
-
-# Copy Prometheus binaries to appropriate locations
-sudo cp prometheus-2.37.0.linux-amd64/prometheus /usr/local/bin
-sudo cp prometheus-2.37.0.linux-amd64/promtool /usr/local/bin/
-
-# Copy Prometheus configuration files
-sudo cp -r prometheus-2.37.0.linux-amd64/consoles /etc/prometheus
-sudo cp -r prometheus-2.37.0.linux-amd64/console_libraries /etc/prometheus
-
-# Clean up downloaded files and extracted directory
-sudo rm -rf prometheus-2.37.0.linux-amd64.tar.gz prometheus-2.37.0.linux-amd64
-
-# Set ownership and permissions
-sudo chown -R prometheus:prometheus /etc/prometheus
-sudo chown -R prometheus:prometheus /var/lib/prometheus
-cat <<EOF | sudo tee /etc/systemd/system/prometheus.service
-[Unit]
-Description=Prometheus
-Wants=network-online.target
-After=network-online.target
-[Service]
-User=prometheus
-Group=prometheus
-Type=simple
-ExecStart=/usr/local/bin/prometheus \
-    --config.file /etc/prometheus/prometheus.yml \
-    --storage.tsdb.path /var/lib/prometheus/ \
-    --web.console.templates=/etc/prometheus/consoles \
-    --web.console.libraries=/etc/prometheus/console_libraries
-[Install]
-WantedBy=multi-user.target
-EOF
-
-cat <<EOF | sudo tee /etc/prometheus/prometheus.yml
+cat <<EOF | sudo tee /monitoring/prometheus.yml
+# my global config
 global:
   scrape_interval: 15s
-  external_labels:
-    monitor: 'prometheus'
+  evaluation_interval: 120s
+
+external_labels:
+  monitor: 'my-project'
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  # - "alert.rules"
+  # - "first.rules"
+  # - "second.rules"
+
 scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'prometheus'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 120s
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
     static_configs:
-      - targets: ['localhost:9090']
-  - job_name: 'node'
-    static_configs:
-      - targets: ['localhost:9100']
+      - targets: ['localhost:9090', 'cadvisor:8080', 'node-exporter:9100', 'nginx-exporter:9113']
+
 EOF
-cd /tmp
-wget https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
-tar xvfz node_exporter-1.6.1.linux-amd64.tar.gz
-sudo cp node_exporter-1.6.1.linux-amd64/node_exporter /usr/local/bin/
-sudo rm -rf node_exporter-1.6.1.linux-amd64*
 
 # Сервіс Node Exporter
-cat <<EOF | sudo tee /etc/systemd/system/node_exporter.service
-[Unit]
-Description=Node Exporter
-After=network.target
-[Service]
-User=prometheus
-Group=prometheus
-Type=simple
-ExecStart=/usr/local/bin/node_exporter
-[Install]
-WantedBy=default.target
+cat <<EOF | sudo tee /monitoring/docker-compose.yml
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: monitoring_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./data/prometheus/config:/etc/prometheus/
+      - ./data/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+
+    ports:
+      - 9090:9090
+    links:
+      - cadvisor:cadvisor
+      - node-exporter:node-exporter
+      - nginx-exporter:nginx-exporter
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monitoring_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    ports:
+      - "9113:9113"
+    command: ["-nginx.scrape-uri", "http://nginx:80/stub_status"]
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    privileged: true
+    command: ["/usr/bin/cadvisor", "--cgroupv2"]
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - 8080
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monitoring_grafana
+    restart: unless-stopped
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=myrul.com
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com:587
+      - GF_SMTP_USER=myadrress@gmail.com
+      - GF_SMTP_PASSWORD=mypassword
+      - GF_SMTP_FROM_ADDRESS=myaddress@gmail.com
+    ports:
+      - 3000:3000
 EOF
 
-# Reload systemd daemon
-sudo systemctl daemon-reload
-sudo systemctl start prometheus
-
-# Check Prometheus service status
-#sudo systemctl status prometheus
-
-# Enable Prometheus service to start on boot
-sudo systemctl enable prometheus.service
-sudo systemctl start node_exporter
-sudo systemctl enable node_exporter.service
+sudo docker compose up -d
