@@ -20,7 +20,7 @@ pipeline {
       }
     }
 
-/*    stage('Terraform Plan') {
+    stage('Terraform Plan') {
       steps {
         sh 'terraform plan'
       }
@@ -30,7 +30,7 @@ pipeline {
       steps {
         sh 'terraform apply -auto-approve'
       }
-    }*/
+    }/*
     stage('Terraform Destroy') {
             steps {
                 // Запитати підтвердження (опціонально)
@@ -42,3 +42,4 @@ pipeline {
         }
   }
 }
+*/
