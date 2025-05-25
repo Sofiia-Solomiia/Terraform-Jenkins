@@ -7,19 +7,10 @@ sudo chmod 666 /var/run/docker.sock
 docker pull sofiasolomiia/weather-page:v11
 sudo docker run -d -p 80:80 sofiasolomiia/weather-page:v11
 
-cat <<EOF | sudo tee /etc/yum.repos.d/grafana.repo
-[grafana]
-name=grafana
-baseurl=https://packages.grafana.com/oss/rpm
-repo_gpgcheck=1
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.grafana.com/gpg.key
-sslverify=1
-sslcacert=/etc/pki/tls/certs/ca-bundle.crt
-EOF
-
-sudo apt-get install grafana
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install -y grafana
 sudo systemctl daemon-reload
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server.service
@@ -72,6 +63,28 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+EOF
+cd /tmp
+wget https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+tar xvfz node_exporter-1.6.1.linux-amd64.tar.gz
+sudo cp node_exporter-1.6.1.linux-amd64/node_exporter /usr/local/bin/
+sudo rm -rf node_exporter-1.6.1.linux-amd64*
+
+# Сервіс Node Exporter
+cat <<EOF | sudo tee /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Node Exporter
+After=network.target
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+[Install]
+WantedBy=default.target
 EOF
 
 # Reload systemd daemon
@@ -83,3 +96,5 @@ sudo systemctl start prometheus
 
 # Enable Prometheus service to start on boot
 sudo systemctl enable prometheus.service
+sudo systemctl start node_exporter
+sudo systemctl enable node_exporter.service
