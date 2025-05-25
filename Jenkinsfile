@@ -19,7 +19,7 @@ pipeline {
         sh 'terraform init'
       }
     }
-
+/*
     stage('Terraform Plan') {
       steps {
         sh 'terraform plan'
@@ -30,7 +30,7 @@ pipeline {
       steps {
         sh 'terraform apply -auto-approve'
       }
-    }/*
+    }*/
     stage('Terraform Destroy') {
             steps {
                 // Запитати підтвердження (опціонально)
@@ -39,7 +39,7 @@ pipeline {
                 // Виконати знищення інфраструктури
                 sh 'terraform destroy -auto-approve'
             }
-        }*/
+        }
   }
 }
 
