@@ -9,6 +9,7 @@ sudo docker run -d -p 80:80 sofiasolomiia/weather-page:v11
 
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+sudo mkdir -p /monitoring
 
 cat <<EOF | sudo tee /monitoring/prometheus.yml
 # my global config
