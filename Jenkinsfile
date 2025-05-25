@@ -13,6 +13,7 @@ pipeline {
     AWS_SECRET_ACCESS_KEY = "${params.AWS_SECRET_ACCESS_KEY}"
   }
 
+  stages {
     stage('Terraform Init') {
       steps {
         sh 'terraform init'
@@ -30,4 +31,5 @@ pipeline {
         sh 'terraform apply -auto-approve'
       }
     }
+  }
 }
