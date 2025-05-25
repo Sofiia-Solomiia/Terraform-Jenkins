@@ -15,6 +15,9 @@ mkdir -p /opt/monitoring/data/prometheus/data
 mkdir -p /opt/monitoring/data/grafana
 mkdir -p /opt/monitoring/data/nginx
 
+chown -R 472:472 /opt/monitoring/data/grafana  # Grafana uses UID 472
+chown -R 65534:65534 /opt/monitoring/data/prometheus/
+
 # Create nginx.conf
 cat <<EOF > /opt/monitoring/data/nginx/nginx.conf
 events {}
@@ -44,7 +47,7 @@ global:
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['prometheus:9090']
 
   - job_name: 'node'
     static_configs:
@@ -140,6 +143,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - 3000:3000
+    user: "472"
 EOF
 
 # Change directory and start the stack
