@@ -39,7 +39,7 @@ pipeline {
                 // Виконати знищення інфраструктури
                 sh 'terraform destroy -auto-approve'
             }
-        }
+        }*/
   }
 }
-*/
+
