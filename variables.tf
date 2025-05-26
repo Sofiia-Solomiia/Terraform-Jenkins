@@ -3,7 +3,7 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  default = "lab6-terraform"
+  default = "jenkins-terraform"
 }
 
 variable "vpc_cidr" {
