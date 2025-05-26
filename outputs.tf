@@ -21,3 +21,10 @@ output "web_server_public_dns" {
 output "web_server_id" {
   value = aws_instance.web.id
 }
+output "Grafana_URL" {
+  value = "http://${aws_instance.web.public_ip}:3000"
+}
+
+output "Prometheus_URL" {
+  value = "http://${aws_instance.web.public_ip}:9090"
+}
