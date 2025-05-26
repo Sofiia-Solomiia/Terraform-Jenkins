@@ -24,5 +24,5 @@ variable "instance_type" {
 
 variable "public_key_path" {
   type    = string
-  default = "tests.pub"
+  //default = "tests.pub"
 }
