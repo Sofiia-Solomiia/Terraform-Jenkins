@@ -1,7 +1,7 @@
 properties([
   parameters([
     string(name: 'AWS_ACCESS_KEY_ID', defaultValue: ''),
-    string(name: 'AWS_SECRET_ACCESS_KEY', defaultValue: '')
+    string(name: 'AWS_SECRET_ACCESS_KEY', defaultValue: ''),
     string(name: 'PUBLIC_KEY_PATH', defaultValue: '')
   ])
 ])
