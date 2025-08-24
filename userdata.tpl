@@ -144,6 +144,15 @@ services:
     ports:
       - 3000:3000
     user: "472"
+
+  ml-service:
+    image: sofiasolomiia/ml-service:v1
+    container_name: ml-service
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "5000:5000"
 EOF
 
 # Change directory and start the stack
