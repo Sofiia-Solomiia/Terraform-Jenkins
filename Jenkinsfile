@@ -38,8 +38,7 @@ pipeline {
     stage('Terraform Destroy') {
             steps {
                 // Запитати підтвердження (опціонально)
-                input message: 'Are you sure you want to destroy the infrastructure?', ok: 'Destroy'
-
+                echo 'Destroying infrastructure...'
                 // Виконати знищення інфраструктури
                 sh 'terraform destroy -auto-approve \
                 -var="public_key_path=$PUBLIC_KEY_PATH"'
