@@ -21,7 +21,7 @@ pipeline {
         sh 'terraform init'
       }
     }
-    /*
+    
     stage('Terraform Plan') {
       steps {
         sh 'terraform plan \
@@ -34,7 +34,7 @@ pipeline {
         sh 'terraform apply -auto-approve \
         -var="public_key_path=$PUBLIC_KEY_PATH"'
       }
-    }*/
+    }/*
     stage('Terraform Destroy') {
             steps {
                 // Запитати підтвердження (опціонально)
@@ -44,12 +44,12 @@ pipeline {
                 sh 'terraform destroy -auto-approve \
                 -var="public_key_path=$PUBLIC_KEY_PATH"'
             }
-        }/*
+        }*/
     stage('Verify ML Service') {
     steps {
         sh 'curl -f http://$(terraform output -raw public_ip):5000/predict || echo "ML service unavailable"'
       }
-    }*/
+    }
   }
 }
 
