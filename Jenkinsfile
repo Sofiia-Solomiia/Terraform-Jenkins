@@ -47,7 +47,7 @@ pipeline {
         }*/
     stage('Verify ML Service') {
     steps {
-        sh 'curl -f http://$(terraform output -raw public_ip):5000/predict || echo "ML service unavailable"'
+        sh 'curl -f http://$(terraform output -raw web_server_public_ip):5000/predict || echo "ML service unavailable"'
       }
     }
   }
