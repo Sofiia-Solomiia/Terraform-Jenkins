@@ -21,6 +21,11 @@ pipeline {
         sh 'terraform init'
       }
     }
+  stage('Debug') {
+     steps {
+        sh 'echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"'
+     }
+    }
     /*
     stage('Terraform Plan') {
       steps {
