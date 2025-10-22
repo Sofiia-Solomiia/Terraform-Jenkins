@@ -26,7 +26,7 @@ pipeline {
         sh 'echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"'
      }
     }
-    
+    /*
     stage('Terraform Plan') {
       steps {
         sh 'terraform plan \
@@ -39,7 +39,7 @@ pipeline {
         sh 'terraform apply -auto-approve \
         -var="public_key_path=$PUBLIC_KEY_PATH"'
       }
-    }/*
+    }*/
     stage('Terraform Destroy') {
             steps {
                 // Запитати підтвердження (опціонально)
@@ -48,7 +48,7 @@ pipeline {
                 sh 'terraform destroy -auto-approve \
                 -var="public_key_path=$PUBLIC_KEY_PATH"'
             }
-        }*/
+        }
   }
 }
 
