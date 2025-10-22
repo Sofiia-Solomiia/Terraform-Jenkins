@@ -146,7 +146,7 @@ services:
     user: "472"
 
   ml-service:
-    image: sofiasolomiia/ml-service:v5
+    image: sofiasolomiia/ml-service:v6
     container_name: ml-service
     restart: unless-stopped
     depends_on:
